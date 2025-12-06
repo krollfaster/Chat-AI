@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="logo-text">Фиксик AI</span>
+                </div>
+            </div>
+            <button class="new-chat-btn" id="newChatBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+                <span>Новый чат</span>
+            </button>
+
+            <div class="chats-section">
+                <div class="section-header" id="chatsSectionHeader">
+                    <span class="section-title">Чаты</span>
+                </div>
+                <ul class="chats-list" id="chatsList">
+                    <!-- Чаты будут добавляться сюда динамически -->
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <button class="user-icon-btn" id="userIconBtn" onclick="toggleProfilePopup(event)" title="Профиль">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+
+            <!-- Profile Popup -->
+            <div class="profile-popup" id="profilePopup">
+                <div class="profile-popup-header">
+                    <button class="profile-popup-logout" id="profileLogoutBtn" onclick="logout()" title="Выйти"
+                        style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M16 17L21 12L16 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <button class="profile-popup-close" onclick="closeProfilePopup()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Logged In View -->
+                <div class="profile-popup-content" id="profileLoggedIn" style="display: none;">
+                    <div class="profile-avatar">
+                        <img src="" alt="Avatar" class="profile-avatar-img" id="profileAvatarImg">
+                    </div>
+                    <h3 class="profile-name"></h3>
+                    <p class="profile-email"></p>
+                    <button class="profile-plan-btn">Выбрать тариф</button>
+                </div>
+
+                <!-- Logged Out View -->
+                <div class="profile-popup-content" id="profileLoggedOut" style="display: flex;">
+                    <h3 class="profile-title" style="margin-bottom: 8px;">Войдите в аккаунт</h3>
+                    <p class="profile-desc"
+                        style="color: var(--text-muted); font-size: 0.9em; text-align: center; margin-bottom: 24px;">
+                        Чтобы сохранять историю чатов и настройки
+                    </p>
+                    <button class="profile-plan-btn" onclick="openAuthModal('login')"
+                        style="margin-top: 0; margin-bottom: 12px;">Войти</button>
+                    <button class="profile-plan-btn" onclick="openAuthModal('register')"
+                        style="margin-top: 0; background: var(--bg-tertiary); color: var(--text-primary);">Регистрация</button>
+                </div>
+            </div>
+
+            <!-- Auth Modal -->
+            <div class="auth-modal" id="authModal">
+                <div class="auth-modal-content">
+                    <button class="auth-modal-close" onclick="closeAuthModal()">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </button>
+                    <h2 class="auth-title" id="authTitle">Вход</h2>
+                    <form id="authForm" onsubmit="handleAuthSubmit(event)">
+                        <div class="auth-field" id="nameField" style="display: none;">
+                            <label>Имя</label>
+                            <input type="text" id="authName" placeholder="Ваше имя">
+                        </div>
+                        <div class="auth-field">
+                            <label>Email</label>
+                            <input type="email" id="authEmail" placeholder="Email" required>
+                        </div>
+                        <div class="auth-field">
+                            <label>Пароль</label>
+                            <input type="password" id="authPassword" placeholder="Пароль" required>
+                        </div>
+                        <button type="submit" class="profile-plan-btn" id="authSubmitBtn">Войти</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="content-placeholder" id="contentArea">
+                <!-- Здесь будет область чата -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Voice Recording Overlay -->
+    <div class="voice-overlay" id="voiceOverlay">
+        <div class="voice-sphere-container">
+            <div class="voice-sphere" id="voiceSphere">
+                <div class="voice-inner-circle"></div>
+            </div>
+        </div>
+        <p class="voice-prompt">Скажите что-нибудь...</p>
+        <div class="voice-controls">
+            <button class="voice-btn cancel" id="voiceCancelBtn" title="Отмена">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </button>
+            <button class="voice-btn confirm recording" id="voiceConfirmBtn" title="Подтвердить">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M12 1C11.2044 1 10.4413 1.31607 9.87868 1.87868C9.31607 2.44129 9 3.20435 9 4V12C9 12.7956 9.31607 13.5587 9.87868 14.1213C10.4413 14.6839 11.2044 15 12 15C12.7956 15 13.5587 14.6839 14.1213 14.1213C14.6839 13.5587 15 12.7956 15 12V4C15 3.20435 14.6839 2.44129 14.1213 1.87868C13.5587 1.31607 12.7956 1 12 1Z"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M19 10V12C19 15.866 15.866 19 12 19M5 10V12C5 15.866 8.13401 19 12 19M12 19V23M8 23H16"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
